@@ -1,0 +1,108 @@
+// buttons
+@mixin button-state ($class) {
+  .#{$class}{
+    &.hover, &.active , &:hover, &:active{
+      color: $Blue_Base;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    &.disabled {
+      color: $Gray_Light;
+      font-weight: normal;
+      cursor: auto;
+    }
+  }
+}
+
+@mixin display-current-icon-state ($class) {
+  $stateList: 'normal', 'hover', 'active', 'disabled';
+  @each $state in $stateList {
+    .icon.#{nth($state, 1)}{
+      display: none;
+    }
+  }
+  .icon.#{$class}{
+    display: inline;
+  }
+}
+
+@mixin flex-alignCenter () {
+  display: flex;
+  align-items: center;
+}
+
+@mixin flex-between-ceter () {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+@mixin layout-padding () {
+  padding: #{$layout_padding_y} #{$layout_padding_x};
+  @media (max-width: 992px) {
+    padding: calc($layout_padding_y * 0.68) calc($layout_padding_x * 0.5);
+  }
+}
+
+@mixin modal-sizing ($width) {
+  @if $width == 'msg-box'{
+    max-width: 35vw;
+    max-height: 80vh;
+  } @else {
+    width: #{$width}vw;
+    height: 80vh;
+  }
+}
+
+@mixin exc-modal-sizing ($width) {
+  width: #{$width}px;
+  height: 80vh;
+}
+
+@mixin pseudo-element () {
+  position: absolute;
+  content: "";
+  display: block;
+  z-index: 1;
+}
+
+@mixin add-pseudo-element($class, $pseudo) {
+  .#{$class}{
+    position: relative;
+
+    &::#{$pseudo}{
+      position: absolute;
+      content: "";
+      display: block;
+      z-index: 1;
+      @content;
+    }
+  }
+}
+
+@mixin auto-rwd-setting($attr){
+
+}
+
+// @mixin rwd-setting($attr, $valuelist){
+
+//   // @media (max-width: 576px){
+//   //   #{$class}:
+// 	// }
+//   // @media (max-width: 768px){
+// 	// }
+//   // @media (max-width: 992px){
+// 	// }
+//   // @media (max-width: 1200px){
+// 	// }
+//   // @media (max-width: 1400px){
+// 	// }
+// }
+
+// @mixin interateBp ($attr, $value){
+//   @each $bp in $bp_list {
+//     @media (max-width: #{nth($tuple, 1)}){
+//       $attr:
+// 	  }
+//   }
+// }

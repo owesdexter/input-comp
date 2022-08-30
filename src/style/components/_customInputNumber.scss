@@ -1,0 +1,16 @@
+.custom-input-number{
+  padding: 8px;
+  .btn, .number-displayer{
+    width: 48px;
+    height: 48px;
+    margin-right: 8px;
+    border: 1px solid $black;
+  }
+  .btn{
+    margin-right: 8px
+  }
+}
+
+input[type=number]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+}

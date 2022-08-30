@@ -1,0 +1,26 @@
+/* ---------------------------- Utils ---------------------------- */
+@import "utils/variables";
+@import "utils/mixins";
+
+/* -------------------------- Venders ------------------------- */
+
+/* ---------------------------- Base ----------------------------- */
+// @import "base/fonts";
+@import "base/normalize";
+@import "base/common";
+
+/* -------------------------- Components ------------------------- */
+@import "components/customInputNumber";
+
+/* --------------------------- Layout ---------------------------- */
+
+/* ---------------------------- Pages ---------------------------- */
+
+/* --------------------------- Themes ---------------------------- */
+// @import "themes/default";
+// @import "themes/dark";
+
+/* --------------------------- Others ---------------------------- */
+// @import "other/other";
+
+// @import "~/node_modules/bootstrap/scss/bootstrap";
