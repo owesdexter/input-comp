@@ -5,9 +5,10 @@ import './style/index.scss';
 const App: React.FC<{}> = () => {
   return (
     <>
-      <CustomInputNumber />
-      {/* <HelloWorld />
-      <RenderForm /> */}
+      <CustomInputNumber
+
+      />
+      <input type="number" name="" id="" />
     </>
   );
 };

@@ -27,7 +27,7 @@ const defaultInterval = 1024;
 export default function CustomInputNumber({
   idSuffix,
   min=0,
-  max=10,
+  max=50,
   step=1,
   name,
   value,
@@ -36,22 +36,21 @@ export default function CustomInputNumber({
   onBlur,
 }:IInputProps){
   const inputId = idSuffix ? `custom-input-number-${idSuffix}`: 'custom-input-number';
-  const [inputValue, setInputValue] = useState<string>(value ? `${value}`: `${min}`);
+  const [inputValue, setInputValue] = useState<number>(value ?? min);
   const [isFocus, setIsFoucs] = useState<boolean>(false);
   const [isDisabled, setIsDisabled] = useState<boolean>(disabled || !!(max && min && max===min));
   const [inputValueStatus, setInputValueStatus] = useState<string>('');
+  const [interval, setInterval] = useState<number>(1024);
+  // const [timer, setTimer] = useState<ReturnType<typeof setTimeout>| null>(null);
   const btnTimer = useRef<ReturnType<typeof setTimeout>| null>(null);
   const Modifytimer = useRef<ReturnType<typeof setTimeout>| null>(null);
   const intervalRef = useRef<number>(defaultInterval);
 
-
-
   const validators = (diff: number): number =>{
-    const currentInt = isNaN(parseInt(inputValue)) || !inputValue? 0: parseInt(inputValue);
-    if(max && (currentInt + diff)>= max){
-      return (max-currentInt);
-    }else if(typeof min !=='undefined' && (currentInt + diff)<= min){
-      return (min<0? min-currentInt: currentInt-min);
+    if(max && (inputValue+diff)>= max){
+      return (max-diff);
+    }else if(min && (inputValue+diff)<= min){
+      return (inputValue-min);
     }else{
       return diff;
     }
@@ -68,11 +67,7 @@ export default function CustomInputNumber({
         break
     }
     diff = validators(diff);
-    setInputValue(pre=> {
-      console.log(`diff: ${diff}`)
-      const newValue = isNaN(parseInt(pre)) || !pre? 0: parseInt(pre);
-      return `${newValue + diff}`
-    });
+    setInputValue(pre=> pre+diff);
     intervalRef.current = intervalRef.current<=50? 50: intervalRef.current/2;
   }
 
@@ -93,7 +88,41 @@ export default function CustomInputNumber({
     intervalRef.current = defaultInterval;
   }
 
+  const handleInputKeyup=(e: React.KeyboardEvent<HTMLInputElement>)=>{
+    console.log(`key: ${e.key}`)
 
+  }
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>)=>{
+    const newValue = parseInt(e.target.value);
+    if(Modifytimer?.current) {
+      clearTimeout(Modifytimer.current);
+    }
+    if(!newValue || isNaN(newValue)){
+      if(isNaN(newValue)){
+        console.log(" isNaN ");
+      }
+      if(!newValue){
+        console.log(" Undefined ");
+      }
+      Modifytimer.current = setTimeout(() =>
+        setInputValue(min)
+      , 500)
+    }
+    setInputValue(parseInt(e.target.value));
+    // if(/\d+/){
+    //   setInputValue(parseInt(e.target.value));
+    // }else{
+    //   setInputValue(e.target.value);
+    // }
+
+    // let diff = parseInt(e.target.value) - inputValue;
+    // if(!isNaN(diff)){
+    //   diff = validators(diff);
+    //   onChange?.(e);
+    //   setInputValue(pre=> pre + diff);
+    // }
+  }
 
   const handleNumberBlur=(e: React.ChangeEvent<HTMLInputElement>)=>{
     console.log('Blur', `${e.target.name} = ${e.target.value}`)
@@ -106,62 +135,38 @@ export default function CustomInputNumber({
   }
 
   const modifyInputValue = useCallback(()=>{
-    const newValue = parseInt(inputValue);
-
-    if(typeof max !=='undefined' && (newValue> max)){
+    if(max && inputValue> max){
       setInputValueStatus(EInputValueStatus.Max);
-      setInputValue(`${max}`);
-    }else if(typeof min !=='undefined' && (newValue< min)){
+      setInputValue(max);
+
+    }else if(min && inputValue< min){
       setInputValueStatus(EInputValueStatus.Min);
-      setInputValue(`${min}`);
-    }else if(isNaN(newValue)){
-      console.log(`newValue is ${newValue}`)
-      setInputValue(`${min}`);
+      setInputValue(min);
+    }else{
+      setInputValueStatus('');
     }
-    // onChange?.();
   }, [inputValue])
 
-  const callModifyFn = useCallback(()=>{
+  useEffect(()=>{
     if(Modifytimer?.current) {
       clearTimeout(Modifytimer.current);
     }
-    if(!isFocus){
-      modifyInputValue();
+    Modifytimer.current = setTimeout(()=>
+      modifyInputValue()
+    , 600);
+    // if(max && inputValue> max){
+    //   setInputValueStatus(EInputValueStatus.Max);
+    //   setInputValue(max);
 
-    }else{
-      Modifytimer.current = setTimeout(()=>
-        modifyInputValue()
-      , 800);
-    }
-  }, [inputValue])
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>)=>{
-
-    let newValue = parseInt(e.target.value);
-    if(e.target.value.startsWith('-')){
-
-    }else if(/\D/.test(e.target.value)){
-      console.log(`${e.target.value} is not Number`);
-      setInputValue(`${min}`);
-      return
-    }
-
-    if(!newValue || isNaN(newValue)){
-      if(isNaN(newValue)){
-        console.log(`isNaN: ${isNaN(newValue)}; undefined: ${!newValue}`);
-      }
-      callModifyFn();
-      // Modifytimer.current = setTimeout(() =>
-      //   setInputValue(`${min}`)
-      //   , 500)
-      // }
-    }
-    setInputValue(e.target.value);
-  }
-
-  useEffect(()=>{
-    callModifyFn();
-  }, [inputValue, callModifyFn])
+    // }else if(min && inputValue< min){
+    //   setInputValueStatus(EInputValueStatus.Min);
+    //   setInputValue(min);
+    // }else{
+    //   setInputValueStatus('');
+    // }
+    // console.log(`newValue: ${inputValue}`)
+    // clearTimeout()
+  }, [modifyInputValue])
 
   return(
     <div className="custom-input-number">
@@ -174,13 +179,13 @@ export default function CustomInputNumber({
       <label htmlFor="number-displayer" className={`number-displayer-container${isFocus? ` focus`: ''}${isDisabled? ` disabled`: ''}`}>
         <input
           value={inputValue}
-          type="text"
+          type="number"
           id={inputId}
           name={name ?? inputId}
           data-test-id={inputId}
           disabled={isDisabled}
           className="number-displayer"
-          // onKeyUp={handleInputKeyup}
+          onKeyUp={handleInputKeyup}
           onChange={handleInputChange}
           onBlur={handleNumberBlur}
           onFocus={handleNumberFocus}

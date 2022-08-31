@@ -1,16 +1,66 @@
 .custom-input-number{
+  $btn_hight: 3rem;
+  $btn_font_size: 2rem;
+  display: flex;
   padding: 8px;
-  .btn, .number-displayer{
-    width: 48px;
-    height: 48px;
+  // border: 1px solid $black;
+  width: fit-content;
+
+  .action-btn, .number-displayer-container{
+    width: $btn_hight;
+    height: $btn_hight;
     margin-right: 8px;
-    border: 1px solid $black;
   }
-  .btn{
-    margin-right: 8px
+  .action-btn{
+    margin-right: 8px;
+    border: 1px solid $primary;
+    color: $primary;
+
+    &::after{
+      text-align: center;
+      font-size: $btn_font_size;
+      line-height: 1;
+      padding: 0.5rem;
+      display: block;
+    }
+    &.minus::after{
+      // "—" "─" "╴" "–"
+      content: "─";
+    }
+    &.plus::after{
+      content: "＋";
+    }
+    &:last-child{
+      margin-right: 0;
+    }
+  }
+
+  .number-displayer-container{
+    border: 1px solid $gray;
+    padding: 0.8em;
+
+    &.focus, &:focus{
+      border: 1px solid $primary;
+    }
+
+    input{
+      width: 100%;
+      text-align: center;
+      padding: 0;
+      border: 0;
+      &:focus, &:focus-visible{
+        border: 0;
+        outline: 0;
+      }
+    }
   }
 }
 
-input[type=number]::-webkit-inner-spin-button {
-  -webkit-appearance: none;
+input[type=number]{
+  // padding: 0;
+  // border: 0;
+
+  &::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+  }
 }

@@ -5,7 +5,7 @@
   "main": "index.tsx",
   "scripts": {
     "webpack": "webpack",
-    "start": "webpack serve",
+    "dev": "webpack serve",
     "test": "test"
   },
   "repository": {
