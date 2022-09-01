@@ -1,15 +1,29 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 
+interface IInputEventTarget extends EventTarget{
+  name: string;
+  value: string;
+}
+
+interface IInputClickEvent extends React.MouseEvent<HTMLInputElement, MouseEvent>{
+  target: IInputEventTarget;
+}
+
+export type IEventUnion = IInputClickEvent |
+React.ChangeEvent<HTMLInputElement> | React.FocusEvent<HTMLInputElement> | null;
+
 interface IInputProps{
-  idSuffix?: string,
+  idSuffix?: string | number,
   min?: number,
   max?: number,
   step?: number,
   name?: string,
   value?: number,
   disabled?: boolean,
-  onChange?: (e: React.ChangeEvent<HTMLInputElement>)=>void,
-  onBlur?: (e: React.ChangeEvent<HTMLInputElement>)=>void,
+  // onChange?: (e: React.ChangeEvent<HTMLInputElement>)=>void,
+  // onBlur?: (e: React.ChangeEvent<HTMLInputElement>)=>void,
+  onChange?: (e: any)=>void,
+  onBlur?: (e: any)=>void,
 }
 
 enum EBtnActionType {
@@ -20,6 +34,7 @@ enum EBtnActionType {
 enum EInputValueStatus {
   Max = 'max',
   Min = 'min',
+  Normal = '',
 }
 
 const defaultInterval = 1024;
@@ -39,19 +54,40 @@ export default function CustomInputNumber({
   const [inputValue, setInputValue] = useState<string>(value ? `${value}`: `${min}`);
   const [isFocus, setIsFoucs] = useState<boolean>(false);
   const [isDisabled, setIsDisabled] = useState<boolean>(disabled || !!(max && min && max===min));
-  const [inputValueStatus, setInputValueStatus] = useState<string>('');
+  const [inputValueStatus, setInputValueStatus] = useState<EInputValueStatus>(EInputValueStatus.Normal);
+  const [event, setEvent] = useState<any>({
+    target: {
+      value: value ? `${value}`: `${min}`,
+      name: name ? `${name}`: `${inputId}`,
+    }
+  });
   const btnTimer = useRef<ReturnType<typeof setTimeout>| null>(null);
   const Modifytimer = useRef<ReturnType<typeof setTimeout>| null>(null);
   const intervalRef = useRef<number>(defaultInterval);
 
+  const callOnChange = (value: string) =>{
+    if(event?.target){
+      // console.log('updateEventTargetValue', value)
+      const targetObj = event.target;
+      if(targetObj.value){
+        targetObj.value = value;
+      }
 
+      const newEvent = {...event, targetObj};
+      setEvent(newEvent);
+      onChange?.(newEvent);
+    }
+    // else{
+    //   setTimeout(()=>callOnChange, 300);
+    // };
+  }
 
   const validators = (diff: number): number =>{
     const currentInt = isNaN(parseInt(inputValue)) || !inputValue? 0: parseInt(inputValue);
     if(max && (currentInt + diff)>= max){
       return (max-currentInt);
     }else if(typeof min !=='undefined' && (currentInt + diff)<= min){
-      return (min<0? min-currentInt: currentInt-min);
+      return (min<=0? min-currentInt: currentInt-min);
     }else{
       return diff;
     }
@@ -69,7 +105,6 @@ export default function CustomInputNumber({
     }
     diff = validators(diff);
     setInputValue(pre=> {
-      console.log(`diff: ${diff}`)
       const newValue = isNaN(parseInt(pre)) || !pre? 0: parseInt(pre);
       return `${newValue + diff}`
     });
@@ -93,32 +128,25 @@ export default function CustomInputNumber({
     intervalRef.current = defaultInterval;
   }
 
-
-
-  const handleNumberBlur=(e: React.ChangeEvent<HTMLInputElement>)=>{
-    console.log('Blur', `${e.target.name} = ${e.target.value}`)
-    setIsFoucs(false);
-    onBlur?.(e);
-  }
-
-  const handleNumberFocus=(e: React.ChangeEvent<HTMLInputElement>)=>{
-    setIsFoucs(true);
-  }
-
   const modifyInputValue = useCallback(()=>{
     const newValue = parseInt(inputValue);
-
+    let result = '';
     if(typeof max !=='undefined' && (newValue> max)){
       setInputValueStatus(EInputValueStatus.Max);
-      setInputValue(`${max}`);
+      result = `${max}`;
     }else if(typeof min !=='undefined' && (newValue< min)){
       setInputValueStatus(EInputValueStatus.Min);
-      setInputValue(`${min}`);
+      result = `${min}`;
     }else if(isNaN(newValue)){
-      console.log(`newValue is ${newValue}`)
-      setInputValue(`${min}`);
+      result = `${min}`;
     }
-    // onChange?.();
+
+    if(result){
+      setInputValue(result);
+      callOnChange(result);
+    }else{
+      callOnChange(inputValue);
+    }
   }, [inputValue])
 
   const callModifyFn = useCallback(()=>{
@@ -136,7 +164,6 @@ export default function CustomInputNumber({
   }, [inputValue])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>)=>{
-
     let newValue = parseInt(e.target.value);
     if(e.target.value.startsWith('-')){
 
@@ -151,12 +178,32 @@ export default function CustomInputNumber({
         console.log(`isNaN: ${isNaN(newValue)}; undefined: ${!newValue}`);
       }
       callModifyFn();
-      // Modifytimer.current = setTimeout(() =>
-      //   setInputValue(`${min}`)
-      //   , 500)
-      // }
     }
     setInputValue(e.target.value);
+    if(!event._reactName){
+      setEvent(e);
+    }
+  }
+
+  const handleNumberFocus=(e: React.FocusEvent<HTMLInputElement>)=>{
+    setIsFoucs(true);
+    if(!event._reactName){
+      setEvent(e);
+    }
+  }
+
+  const handleNumberBlur=(e: React.FocusEvent<HTMLInputElement>)=>{
+    setIsFoucs(false);
+    onBlur?.(e);
+    if(!event._reactName){
+      setEvent(e);
+    }
+  }
+
+  const handleInputClick=(e: IInputClickEvent | React.MouseEvent<HTMLInputElement, MouseEvent>)=>{
+    if(!event._reactName){
+      setEvent(e);
+    }
   }
 
   useEffect(()=>{
@@ -166,7 +213,7 @@ export default function CustomInputNumber({
   return(
     <div className="custom-input-number">
       <label
-        className={`action-btn minus`}
+        className={`action-btn minus${inputValueStatus===EInputValueStatus.Min? ` disabled`: ''}`}
         htmlFor={inputId}
         onMouseUp={handleBtnUnClick}
         onMouseDown={e=>handleBtnMouseDown(EBtnActionType.Minus)}
@@ -180,6 +227,7 @@ export default function CustomInputNumber({
           data-test-id={inputId}
           disabled={isDisabled}
           className="number-displayer"
+          onClick={e=>handleInputClick(e)}
           // onKeyUp={handleInputKeyup}
           onChange={handleInputChange}
           onBlur={handleNumberBlur}
@@ -187,7 +235,7 @@ export default function CustomInputNumber({
         />
       </label>
       <label
-        className={`action-btn plus`}
+        className={`action-btn plus${inputValueStatus===EInputValueStatus.Max? ` disabled`: ''}`}
         htmlFor={inputId}
         onMouseUp={handleBtnUnClick}
         onMouseDown={e=>handleBtnMouseDown(EBtnActionType.Plus)}
