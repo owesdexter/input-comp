@@ -1,4 +1,3 @@
-import React from "react";
 import RoomAllocation from "./components/roomAllocation";
 import CustomInputNumber from "./components/customInputNumber";
 import { TRoomMemberCount } from "./components/oneRoom";

@@ -34,8 +34,6 @@ export default function RoomAllocation ({ guest, room, onChange }: TRoomAllocati
     return arr
   }, [room])
 
-  // const unAllocated = useMemo<number>(()=>(guest-allocated), [allocated]);
-
   const handleCountChange = (value: TRoomMemberCount, idx: number)=>{
     setCurrentValueArr(pre=>([
       ...pre.slice(0, idx),
@@ -79,8 +77,6 @@ export default function RoomAllocation ({ guest, room, onChange }: TRoomAllocati
                 allocated={allocated}
                 idSuffix={idx}
                 disabled={guest<=room ?? false}
-                disablePlus={guest<=allocated}
-                disableMinus={allocated<0}
                 onChange={handleCountChange}
               />
             </li>

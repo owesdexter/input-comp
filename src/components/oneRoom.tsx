@@ -25,25 +25,18 @@ type TOneRoomProps = {
   allocated?: number,
   unAllocated?: number,
   disabled?: boolean,
-  disablePlus?: boolean,
-  disableMinus?: boolean,
   onChange: (value: TRoomMemberCount, idx: number)=>void
 }
 
 export default function OneRoom ({
-  idSuffix,
   roomMemberList,
+  max,
+  idSuffix,
   allocated,
   unAllocated,
   disabled=false,
-  disablePlus=false,
-  disableMinus=false,
-  max,
   onChange
 }: TOneRoomProps){
-
-
-
   const [currentValue, setCurrentValue] = useState<TRoomMemberCount>(()=>{
     let obj = {} as TRoomMemberCount;
     for(let i=0; i<roomMemberList.length; i++){
@@ -55,7 +48,6 @@ export default function OneRoom ({
   });
 
   const [currentMax, setCurrentMax] = useState<TRoomMemberCount>(()=>{
-    // return buildMax();
     let obj = {} as TRoomMemberCount;
     for(let i=0; i<roomMemberList.length; i++){
       const key = roomMemberList[i].key;
@@ -76,20 +68,6 @@ export default function OneRoom ({
     }
   }, [currentValue])
 
-  // const buildMax = useCallback(()=>{
-  //   let obj = {} as TRoomMemberCount;
-  //   for(const [key, value] of Object.entries(currentValue)){
-  //     let diff = max - totalMemberCount;
-  //     if(typeof unAllocated !== 'undefined'){
-  //       diff = diff<unAllocated? diff: unAllocated;
-  //       console.log(`${idSuffix}~ unAllocated: ${unAllocated}, diff ${max - totalMemberCount}, result: ${diff}`)
-  //     }
-  //     let keyE = key as ERoomMember;
-  //     obj[keyE] = value + diff;
-  //   }
-  //   return obj;
-  // }, [max, unAllocated])
-
   const handleMemberCountChange = (e: React.ChangeEvent<HTMLInputElement>)=>{
     const value = parseInt(e.target.value);
     const name = e.target.name;
@@ -100,13 +78,6 @@ export default function OneRoom ({
         [name]: value
       })
     })
-  }
-
-  const testConsole = ()=>{
-    console.log('unAllocated', unAllocated);
-    console.log('currentMax', currentMax);
-    console.log('currentValue', currentValue);
-    console.log('');
   }
 
   useEffect(()=>{
@@ -138,7 +109,7 @@ export default function OneRoom ({
         {roomMemberList.map(el=>(
           <li className="member-row" key={`${idSuffix}-${el.key}`}>
             <div className="label-container">
-              <div className="label" onClick={testConsole}>{el.label}</div>
+              <div className="label">{el.label}</div>
               {el.description?<div className="description">{el.description}</div>: null}
             </div>
             <div>
