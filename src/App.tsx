@@ -1,36 +1,21 @@
 import React from "react";
+import RoomAllocation from "./components/roomAllocation";
 import CustomInputNumber from "./components/customInputNumber";
+import { TRoomMemberCount } from "./components/oneRoom";
 import './style/index.scss';
 
-// const App: React.FC<{}> = () => {
-//   return (
-//     <>
-//       <CustomInputNumber
-//         onChange={}
-//       />
-//       <input type="number" name="" id="" />
-//     </>
-//   );
-// };
-
-// export default App;
 export default function App (){
-  const handleOnChange = (e: React.ChangeEvent<HTMLInputElement>)=>{
-    console.log(`Change! name: ${e.target.name},  value: ${e.target.value}`);
-    // console.log(e);
-  }
-
-  const handleOnBlur = (e: React.ChangeEvent<HTMLInputElement>)=>{
-    console.log(`Blur! name: ${e.target.name} value: ${e.target.value}`);
+  const handleChange = (result: TRoomMemberCount[])=>{
+    console.log('result', result);
   }
 
   return (
     <>
-      <CustomInputNumber
-        onChange={handleOnChange}
-        onBlur={handleOnBlur}
+      <RoomAllocation
+        guest={10}
+        room={3}
+        onChange={handleChange}
       />
-      {/* <input type="number" name="" id="" /> */}
     </>
   );
 };

@@ -1,0 +1,9 @@
+.roomAllocation{
+  .one-room{
+    .member-row{
+      @include flex-between-ceter;
+      margin-bottom: 0.5em;
+    }
+    margin-bottom: 1em;
+  }
+}
