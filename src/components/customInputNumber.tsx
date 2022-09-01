@@ -41,8 +41,8 @@ const defaultInterval = 1024;
 
 export default function CustomInputNumber({
   idSuffix,
-  min=0,
-  max=10,
+  min=-5,
+  max=5,
   step=1,
   name,
   value,
@@ -51,13 +51,15 @@ export default function CustomInputNumber({
   onBlur,
 }:IInputProps){
   const inputId = idSuffix ? `custom-input-number-${idSuffix}`: 'custom-input-number';
-  const [inputValue, setInputValue] = useState<string>(value ? `${value}`: `${min}`);
+  const [inputValue, setInputValue] = useState<string>(value ? `${value}`: `${min? min: 0}`);
   const [isFocus, setIsFoucs] = useState<boolean>(false);
   const [isDisabled, setIsDisabled] = useState<boolean>(disabled || !!(max && min && max===min));
-  const [inputValueStatus, setInputValueStatus] = useState<EInputValueStatus>(EInputValueStatus.Normal);
+  const [inputValueStatus, setInputValueStatus] = useState<EInputValueStatus>(
+    typeof min !== 'undefined'? EInputValueStatus.Min: EInputValueStatus.Normal
+  );
   const [event, setEvent] = useState<any>({
     target: {
-      value: value ? `${value}`: `${min}`,
+      value: value ? `${value}`: `${min? min: 0}`,
       name: name ? `${name}`: `${inputId}`,
     }
   });
@@ -67,7 +69,6 @@ export default function CustomInputNumber({
 
   const callOnChange = (value: string) =>{
     if(event?.target){
-      // console.log('updateEventTargetValue', value)
       const targetObj = event.target;
       if(targetObj.value){
         targetObj.value = value;
@@ -77,9 +78,6 @@ export default function CustomInputNumber({
       setEvent(newEvent);
       onChange?.(newEvent);
     }
-    // else{
-    //   setTimeout(()=>callOnChange, 300);
-    // };
   }
 
   const validators = (diff: number): number =>{
@@ -131,20 +129,24 @@ export default function CustomInputNumber({
   const modifyInputValue = useCallback(()=>{
     const newValue = parseInt(inputValue);
     let result = '';
-    if(typeof max !=='undefined' && (newValue> max)){
+
+    if(typeof max !=='undefined' && (newValue>= max)){
       setInputValueStatus(EInputValueStatus.Max);
       result = `${max}`;
-    }else if(typeof min !=='undefined' && (newValue< min)){
+    }else if(typeof min !=='undefined' && (newValue<= min)){
       setInputValueStatus(EInputValueStatus.Min);
-      result = `${min}`;
+      result = `${min? min: 0}`;
     }else if(isNaN(newValue)){
-      result = `${min}`;
+      setInputValueStatus(EInputValueStatus.Min);
+      result = `${min? min: 0}`;
     }
 
     if(result){
       setInputValue(result);
       callOnChange(result);
+
     }else{
+      setInputValueStatus(EInputValueStatus.Normal);
       callOnChange(inputValue);
     }
   }, [inputValue])
@@ -169,7 +171,7 @@ export default function CustomInputNumber({
 
     }else if(/\D/.test(e.target.value)){
       console.log(`${e.target.value} is not Number`);
-      setInputValue(`${min}`);
+      setInputValue(`${min? min: 0}`);
       return
     }
 
@@ -211,9 +213,9 @@ export default function CustomInputNumber({
   }, [inputValue, callModifyFn])
 
   return(
-    <div className="custom-input-number">
+    <div className={`custom-input-number${isDisabled? ` disabled`: ''}`}>
       <label
-        className={`action-btn minus${inputValueStatus===EInputValueStatus.Min? ` disabled`: ''}`}
+        className={`action-btn minus${inputValueStatus===EInputValueStatus.Min || isDisabled? ` disabled`: ''}`}
         htmlFor={inputId}
         onMouseUp={handleBtnUnClick}
         onMouseDown={e=>handleBtnMouseDown(EBtnActionType.Minus)}
@@ -228,14 +230,13 @@ export default function CustomInputNumber({
           disabled={isDisabled}
           className="number-displayer"
           onClick={e=>handleInputClick(e)}
-          // onKeyUp={handleInputKeyup}
           onChange={handleInputChange}
           onBlur={handleNumberBlur}
           onFocus={handleNumberFocus}
         />
       </label>
       <label
-        className={`action-btn plus${inputValueStatus===EInputValueStatus.Max? ` disabled`: ''}`}
+        className={`action-btn plus${inputValueStatus===EInputValueStatus.Max || isDisabled? ` disabled`: ''}`}
         htmlFor={inputId}
         onMouseUp={handleBtnUnClick}
         onMouseDown={e=>handleBtnMouseDown(EBtnActionType.Plus)}
