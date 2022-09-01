@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useCallback, useEffect } from "react";
 import CustomInputNumber from "./customInputNumber";
 
 export enum ERoomMember{
@@ -22,6 +22,8 @@ type TOneRoomProps = {
   roomMemberList: TRoomMemberInfo[],
   max: number
   idSuffix?: string | number,
+  allocated?: number,
+  unAllocated?: number,
   disabled?: boolean,
   disablePlus?: boolean,
   disableMinus?: boolean,
@@ -31,12 +33,16 @@ type TOneRoomProps = {
 export default function OneRoom ({
   idSuffix,
   roomMemberList,
+  allocated,
+  unAllocated,
   disabled=false,
   disablePlus=false,
   disableMinus=false,
   max,
   onChange
 }: TOneRoomProps){
+
+
 
   const [currentValue, setCurrentValue] = useState<TRoomMemberCount>(()=>{
     let obj = {} as TRoomMemberCount;
@@ -49,6 +55,7 @@ export default function OneRoom ({
   });
 
   const [currentMax, setCurrentMax] = useState<TRoomMemberCount>(()=>{
+    // return buildMax();
     let obj = {} as TRoomMemberCount;
     for(let i=0; i<roomMemberList.length; i++){
       const key = roomMemberList[i].key;
@@ -69,6 +76,20 @@ export default function OneRoom ({
     }
   }, [currentValue])
 
+  // const buildMax = useCallback(()=>{
+  //   let obj = {} as TRoomMemberCount;
+  //   for(const [key, value] of Object.entries(currentValue)){
+  //     let diff = max - totalMemberCount;
+  //     if(typeof unAllocated !== 'undefined'){
+  //       diff = diff<unAllocated? diff: unAllocated;
+  //       console.log(`${idSuffix}~ unAllocated: ${unAllocated}, diff ${max - totalMemberCount}, result: ${diff}`)
+  //     }
+  //     let keyE = key as ERoomMember;
+  //     obj[keyE] = value + diff;
+  //   }
+  //   return obj;
+  // }, [max, unAllocated])
+
   const handleMemberCountChange = (e: React.ChangeEvent<HTMLInputElement>)=>{
     const value = parseInt(e.target.value);
     const name = e.target.name;
@@ -82,18 +103,24 @@ export default function OneRoom ({
   }
 
   const testConsole = ()=>{
+    console.log('unAllocated', unAllocated);
     console.log('currentMax', currentMax);
     console.log('currentValue', currentValue);
+    console.log('');
   }
 
   useEffect(()=>{
     let obj = {} as TRoomMemberCount;
     for(const [key, value] of Object.entries(currentValue)){
+      let diff = max - totalMemberCount;
+      if(typeof unAllocated !== 'undefined'){
+        diff = diff<unAllocated? diff: unAllocated;
+      }
       let keyE = key as ERoomMember;
-      obj[keyE] = value + (max - totalMemberCount);
+      obj[keyE] = value + diff;
     }
     setCurrentMax(obj);
-  }, [currentValue])
+  }, [max, unAllocated])
 
   useEffect(()=>{
     if(typeof idSuffix === 'string'){
@@ -110,7 +137,7 @@ export default function OneRoom ({
       <ul className="room-member-list">
         {roomMemberList.map(el=>(
           <li className="member-row" key={`${idSuffix}-${el.key}`}>
-            <div>
+            <div className="label-container">
               <div className="label" onClick={testConsole}>{el.label}</div>
               {el.description?<div className="description">{el.description}</div>: null}
             </div>
@@ -122,8 +149,6 @@ export default function OneRoom ({
                 max={currentMax[el.key]}
                 step={1}
                 disabled={disabled}
-                disablePlus={disablePlus}
-                disableMinus={disableMinus}
                 onChange={handleMemberCountChange}
               />
             </div>

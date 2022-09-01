@@ -34,6 +34,8 @@ export default function RoomAllocation ({ guest, room, onChange }: TRoomAllocati
     return arr
   }, [room])
 
+  // const unAllocated = useMemo<number>(()=>(guest-allocated), [allocated]);
+
   const handleCountChange = (value: TRoomMemberCount, idx: number)=>{
     setCurrentValueArr(pre=>([
       ...pre.slice(0, idx),
@@ -54,9 +56,13 @@ export default function RoomAllocation ({ guest, room, onChange }: TRoomAllocati
     onChange(currentValueArr);
   }, [currentValueArr, setAllocated])
 
+  useEffect(()=>{
+    console.log(`Main Change: ${guest-allocated}`)
+  }, [allocated])
+
   return (
     <>
-      <div className="menu">
+      <div className="room-allocation">
         <div className="title">
           {`住客人數: ${guest}人/${room}房`}
         </div>
@@ -69,6 +75,8 @@ export default function RoomAllocation ({ guest, room, onChange }: TRoomAllocati
               <OneRoom
                 roomMemberList={roomMemberList}
                 max={PEOPLE_PER_ROOM}
+                unAllocated={guest-allocated}
+                allocated={allocated}
                 idSuffix={idx}
                 disabled={guest<=room ?? false}
                 disablePlus={guest<=allocated}

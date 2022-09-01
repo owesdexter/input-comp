@@ -1,9 +1,46 @@
-.roomAllocation{
+.room-allocation{
+  width: 576px;
+  padding: 1em 2em;
+  .title{
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: $black;
+    margin-bottom: 1rem;
+  }
+  .sub-title{
+    padding: 1em;
+    color: $primary;
+    background-color: $primary_active_bg;
+  }
   .one-room{
-    .member-row{
-      @include flex-between-ceter;
-      margin-bottom: 0.5em;
+    // margin-bottom: 1em;
+    padding: 1em;
+    border-bottom: 1px solid $gray_lighter;
+    &:last-child{
+      margin-bottom: 0;
     }
-    margin-bottom: 1em;
+
+    .title{
+      font-size: 1rem;
+    }
+    .label-container{
+      .label{
+        font-weight: 600;
+      }
+      .description{
+        color: $gray_darker;
+      }
+    }
+    .room-member-list{
+      .member-row{
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 0.5em;
+        &:last-child{
+          margin-bottom: 0;
+        }
+      }
+    }
   }
 }

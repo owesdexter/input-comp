@@ -21,6 +21,8 @@ interface IInputProps{
   step?: number,
   name?: string,
   value?: number,
+  restCount?: number,
+  minCount?: number,
   disabled?: boolean,
   disablePlus?: boolean,
   disableMinus?: boolean,
@@ -50,6 +52,8 @@ export default function CustomInputNumber({
   name,
   value,
   disabled=false,
+  restCount,
+  minCount,
   disablePlus=false,
   disableMinus=false,
   customCompClassName,
@@ -59,7 +63,7 @@ export default function CustomInputNumber({
   const inputId = idSuffix ? `custom-input-number-${idSuffix}`: 'custom-input-number';
   const [inputValue, setInputValue] = useState<string>(value ? `${value}`: `${min? min: 0}`);
   const [isFocus, setIsFoucs] = useState<boolean>(false);
-  const [isDisabled, setIsDisabled] = useState<boolean>(disabled || !!(max && min && max===min) || (disablePlus && disableMinus));
+  const [isDisabled, setIsDisabled] = useState<boolean>(disabled || !!(max && min && max===min));
   const [isMax, setIsMax] = useState<boolean>(false);
   const [isMin, setIsMin] = useState<boolean>(false);
   const [event, setEvent] = useState<any>({
@@ -88,8 +92,8 @@ export default function CustomInputNumber({
   const validators = (type?: EBtnActionType): boolean => {
 
     if(isDisabled ||
-      ((isMax || disablePlus) && type === EBtnActionType.Plus) ||
-      ((isMin || disableMinus) && type === EBtnActionType.Minus)
+      (isMax && type === EBtnActionType.Plus) ||
+      (isMin && type === EBtnActionType.Minus)
     ){
       return false
     }else{
@@ -100,7 +104,7 @@ export default function CustomInputNumber({
   const getDifference = (diff: number): number => {
     const currentInt = isNaN(parseInt(inputValue)) || !inputValue? 0: parseInt(inputValue);
 
-    if(max && (currentInt + diff)> max){
+    if(max && (currentInt + diff)>= max){
       return (max-currentInt);
     }else if(typeof min !=='undefined' && (currentInt + diff)< min){
       return (min<=0? min-currentInt: currentInt-min);
@@ -160,12 +164,14 @@ export default function CustomInputNumber({
     }else{
       setIsMax(false);
     }
+
     if((typeof min !=='undefined' && (newValue<= min))){
       setIsMin(true);
       result = `${min? min: 0}`;
     }else{
       setIsMin(false);
     }
+
     if(isNaN(newValue)){
       setIsMin(true);
       result = `${min? min: 0}`;
@@ -185,13 +191,14 @@ export default function CustomInputNumber({
     if(Modifytimer?.current) {
       clearTimeout(Modifytimer.current);
     }
+    modifyInputValue();
     if(!isFocus){
       modifyInputValue();
 
     }else{
       Modifytimer.current = setTimeout(()=>
         modifyInputValue()
-      , 200);
+      , 600);
     }
   }, [inputValue, max, min])
 
@@ -206,9 +213,11 @@ export default function CustomInputNumber({
       return
     }
     let newValue = parseInt(e.target.value);
-    if(e.target.value.startsWith('-')){
 
-    }else if(/\D/.test(e.target.value)){
+    if(
+      /\D/.test(e.target.value) ||
+      (e.target.value.includes('-') && !e.target.value.startsWith('-'))
+    ){
       console.log(`${e.target.value} is not Number`);
       setInputValue(`${min? min: 0}`);
       return
@@ -246,7 +255,7 @@ export default function CustomInputNumber({
   return(
     <div className={`${customCompClassName ?? 'custom-input-number'}${isDisabled? ` disabled`: ''}`}>
       <label
-        className={`action-btn minus${isMin || disableMinus || isDisabled? ` disabled`: ''}`}
+        className={`action-btn minus${isMin || isDisabled? ` disabled`: ''}`}
         htmlFor={inputId}
         data-test-id={`action-btn-minus-${idSuffix}`}
         onMouseUp={handleBtnUnClick}
@@ -268,7 +277,7 @@ export default function CustomInputNumber({
         />
       </label>
       <label
-        className={`action-btn plus${isMax || disablePlus || isDisabled? ` disabled`: ''}`}
+        className={`action-btn plus${isMax || isDisabled? ` disabled`: ''}`}
         htmlFor={inputId}
         data-test-id={`action-btn-plus-${idSuffix}`}
         onMouseUp={handleBtnUnClick}

@@ -9,12 +9,20 @@ export default function App (){
     console.log('result', result);
   }
 
+  const handleInputChange = (e: any)=>{
+    console.log(`name: ${e.target.name}, value: ${e.target.value},`);
+  }
+
   return (
     <>
       <RoomAllocation
         guest={10}
         room={3}
         onChange={handleChange}
+      />
+      <CustomInputNumber
+        name="NameStr"
+        onChange={handleInputChange}
       />
     </>
   );
