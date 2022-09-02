@@ -54,10 +54,6 @@ export default function RoomAllocation ({ guest, room, onChange }: TRoomAllocati
     onChange(currentValueArr);
   }, [currentValueArr, setAllocated])
 
-  useEffect(()=>{
-    console.log(`Main Change: ${guest-allocated}`)
-  }, [allocated])
-
   return (
     <>
       <div className="room-allocation">

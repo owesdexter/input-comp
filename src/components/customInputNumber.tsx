@@ -210,15 +210,11 @@ export default function CustomInputNumber({
       /\D/.test(e.target.value) ||
       (e.target.value.includes('-') && !e.target.value.startsWith('-'))
     ){
-      console.log(`${e.target.value} is not Number`);
       setInputValue(`${min? min: 0}`);
       return
     }
 
     if(!newValue || isNaN(newValue)){
-      if(isNaN(newValue)){
-        console.log(`isNaN: ${isNaN(newValue)}; undefined: ${!newValue}`);
-      }
       callModifyFn();
     }
     setInputValue(e.target.value);

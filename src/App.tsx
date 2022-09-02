@@ -9,7 +9,11 @@ export default function App (){
   }
 
   const handleInputChange = (e: any)=>{
-    console.log(`name: ${e.target.name}, value: ${e.target.value},`);
+    console.log(`Change: name=${e.target.name}, value=${e.target.value},`);
+  }
+
+  const handleInputBlur = (e: any)=>{
+    console.log(`Blur: name=${e.target.name}, value=${e.target.value},`);
   }
 
   return (
@@ -22,6 +26,7 @@ export default function App (){
       <CustomInputNumber
         name="NameStr"
         onChange={handleInputChange}
+        onBlur={handleInputBlur}
       />
     </>
   );
